@@ -1,0 +1,51 @@
+import processing.data.*;
+import processing.opengl.*;
+import java.util.HashMap;
+import java.io.File;
+import java.io.PrintWriter;
+import java.io.OutputStream;
+
+
+ * Array Objects. 
+ * Demonstrates the syntax for creating an array of custom objects. 
+
+int count;
+
+  /* size commented out by preprocessor */;
+  int wideCount = width / unit;
+  count = wideCount * highCount;
+
+  for (int y = 0; y < highCount; y++) {
+      mods[index++] = new Module(x*unit, y*unit, unit/2, unit/2, random(0.05f, 0.8f), unit);
+  }
+
+  background(0);
+    mod.update();
+  }
+class Module {
+  int yOffset;
+  int unit;
+  int yDirection = 1;
+  
+  Module(int xOffsetTemp, int yOffsetTemp, int xTemp, int yTemp, float speedTemp, int tempUnit) {
+    yOffset = yOffsetTemp;
+    y = yTemp;
+    unit = tempUnit;
+  
+   public void update() {
+    if (x >= unit || x <= 0) {
+      x = x + (1 * xDirection);
+    }
+      yDirection *= -1;
+    }
+  
+   public void display() {
+    ellipse(xOffset + x, yOffset + y, 6, 6);
+}
+
+
+    String[] appletArgs = new String[] { "sketch_220803a" };
+      PApplet.main(concat(appletArgs, passedArgs));
+      PApplet.main(appletArgs);
+  }
+null
