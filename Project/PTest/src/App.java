@@ -1,22 +1,28 @@
 import java.io.*;
 
 public class App {
-    private static String parameterTest = "-pt";
-    private static String functionalityTest = "-ft";
+    private static String staticTest = "-st";
+    private static String dynamicTest = "-dt";
     private static String outPut = "OUTPUT";
+    private static String exit = "EXIT";
     private static String str = "";
     private static String txt = "";
 
+    // "C:\\Users\\joshu\\OneDrive\\Documents\\Uni\\COMP4050\\Processing-Tester\\sketch_220803a.java"
     public static void main(String[] args) throws IOException {
-        File javaFile = new File(
-                "C:\\Users\\joshu\\OneDrive\\Documents\\Uni\\COMP4050\\Processing-Tester\\sketch_220803a.java");
+        // arguments need to account for folder naming convention before checking
+        // contents, file type checked is java or naming convention of java file
+        File javaFile = new File(args[0]);
         InputStreamReader in = new InputStreamReader(System.in);
         BufferedReader bf = new BufferedReader(in);
         try {
-            if (args[0].equals(parameterTest)) {
-                while (!str.equals("EXIT")) {
+            if (args[0].length() > 0) {
+                while (!str.equals(exit)) {
                     str = bf.readLine();
-                    if (str.equals("OUTPUT")) {
+                    if (str.equals(staticTest)) {
+                        System.out.println("Static Test Check");
+                    }
+                    if (str.equals(outPut)) {
                         txtOutput(javaFile);
                     }
                 }
@@ -24,9 +30,11 @@ public class App {
                 System.exit(0);
 
             }
+
         } catch (Exception e) {
             System.out.println("Error: invalid input parameters");
             e.printStackTrace();
+
         }
 
     }
