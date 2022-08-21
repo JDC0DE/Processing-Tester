@@ -32,6 +32,8 @@ public class App {
         // Will the program also loop through the submissions folder and check each
         // students subfolder or will it only take a single project submission at a
         // time and then finish?
+        // test file = Punit_tf.txt - should be exclusive tests for st and dt? or also
+        // ct?
         InputStreamReader in = new InputStreamReader(System.in);
         BufferedReader bf = new BufferedReader(in);
         try {
@@ -49,6 +51,8 @@ public class App {
 
                 if (Pattern.matches("\\w+\\.pde", inputFile.getName())) {
                     System.out.println("is pde valid match: " + inputFile.getName());
+                    runProcessingCommand(
+                            ".\\processing-java --sketch=C:\\Users\\joshu\\OneDrive\\Documents\\Uni\\COMP4050\\example_assignment-main\\example_assignment-main\\Submissions\\s0001_Alice_Penguin\\MarchPenguin --run");
                 }
 
             }
@@ -82,6 +86,7 @@ public class App {
     }
 
     public static void txtOutput(File input) throws IOException {
+        // scanner is better for reading text
         PrintWriter out = new PrintWriter("output.txt");
         Scanner fReader = new Scanner(new FileReader(input));
         while (fReader.hasNextLine()) {
@@ -122,5 +127,12 @@ public class App {
         }
 
         sfm.close();
+    }
+
+    public static void runProcessingCommand(String command) throws Exception {
+        Process runCmd = Runtime.getRuntime().exec(command);
+        System.out.println(command);
+        runCmd.waitFor();
+        System.out.println(command + runCmd.exitValue());
     }
 }
