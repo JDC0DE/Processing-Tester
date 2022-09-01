@@ -1,4 +1,8 @@
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -8,7 +12,7 @@ import java.util.regex.*;
 import javax.lang.model.SourceVersion;
 import javax.tools.*;
 
-public class App {
+public class Punit {
     private static String compileTest = "-ct";
     private static String staticTest = "-st";
     private static String dynamicTest = "-dt";
@@ -18,9 +22,13 @@ public class App {
 
     private static String str = "";
     private static String txt = "";
+    private static String outPath = "";
+
     private static Boolean ctCheck;
     private static Boolean stCheck;
     private static Boolean dtCheck;
+
+    private static Boolean conversionCheck;
 
     // "C:\\Users\\joshu\\OneDrive\\Documents\\Uni\\COMP4050\\Processing-Tester\\sketch_220803a.java"
     // "C:\\Users\\joshu\\OneDrive\\Documents\\Uni\\COMP4050\\Processing-Tester\\sketch_220803a.pde"
@@ -42,6 +50,11 @@ public class App {
         // ct?
         // If they submit only a pde file that will is it assumed the directory up will
         // be the project?
+        // Note: check for if the folder is empty or if the file in the project is
+        // correct file type
+
+        // Should probs do a check for why the runProcessingCmd == 1 - whats casuing the
+        // issue? - probably because the export folder already exists
         InputStreamReader in = new InputStreamReader(System.in);
         BufferedReader bf = new BufferedReader(in);
         try {
@@ -55,6 +68,7 @@ public class App {
             if (inputFile.isFile() && inputFile.exists()) {
                 if (Pattern.matches("\\w+\\.java", inputFile.getName())) {
                     System.out.println("is java valid match: " + inputFile.getName());
+                    conversionCheck = false;
                 }
 
                 if (Pattern.matches("\\w+\\.pde", inputFile.getName())) {
@@ -62,8 +76,15 @@ public class App {
                     String path = inputFile.getParent();
                     runProcessingCommand(
                             ".\\processing-java --sketch=" + path + " --run");
-                    runProcessingCommand(".\\processing-java --sketch=" + path
-                            + "--output=C:\\Users\\joshu\\OneDrive\\Documents\\Uni\\COMP4050\\test1 --export");
+                    if (runProcessingCommand(".\\processing-java --sketch=" + path + " "
+                            + "--output=C:\\Users\\joshu\\OneDrive\\Documents\\Uni\\COMP4050\\test2 --export") == 0) {
+                        conversionCheck = true;
+                        inputFile = new File(
+                                "C:\\Users\\joshu\\OneDrive\\Documents\\Uni\\COMP4050\\test2\\source\\MarchPenguin.java");
+                    } else {
+                        conversionCheck = false;
+                    }
+
                     // runProcessingCommand(
                     // ".\\processing-java
                     // --sketch=C:\\Users\\joshu\\OneDrive\\Documents\\Uni\\COMP4050\\example_assignment-main\\example_assignment-main\\Submissions\\s0001_Alice_Penguin\\MarchPenguin
@@ -99,6 +120,14 @@ public class App {
             e.printStackTrace();
 
         }
+
+    }
+
+    public static void processingProjectHandler() {
+
+    }
+
+    public static void javaProjectHandler() {
 
     }
 
@@ -155,6 +184,8 @@ public class App {
 
     }
 
+    // read the converted pde file add in the new functions for testing check
+    // outputs - for dynamic testing
     public static void txtOutput(File input) throws IOException {
         // scanner is better for reading text
         PrintWriter out = new PrintWriter("output.txt");
@@ -172,12 +203,29 @@ public class App {
 
     }
 
+    // returns the arguments for compiling - needs to be fixed so that its adaptable
+    // for each student
+    public static ArrayList<String> compilerArgs() {
+        ArrayList<String> args = new ArrayList<>();
+        args.add("-cp");
+        args.add(
+                "\"C:\\Users\\joshu\\OneDrive\\Documents\\Uni\\COMP4050\\test2\\lib\\jogl-all.jar;c:\\Users\\joshu\\OneDrive\\Documents\\Uni\\COMP4050\\test2\\lib\\core.jar;c:\\Users\\joshu\\OneDrive\\Documents\\Uni\\COMP4050\\test2\\lib\\gluegen-rt.jar;c:\\Users\\joshu\\OneDrive\\Documents\\Uni\\COMP4050\\test2\\lib\\MarchPenguin.jar\"");
+        return args;
+        // "\"C:\\Users\\joshu\\OneDrive\\Documents\\Uni\\COMP4050\\test2\\lib\\jogl-all.jar;c:\\Users\\joshu\\OneDrive\\Documents\\Uni\\COMP4050\\test2\\lib\\core.jar;c:\\Users\\joshu\\OneDrive\\Documents\\Uni\\COMP4050\\test2\\lib\\gluegen-rt.jar;c:\\Users\\joshu\\OneDrive\\Documents\\Uni\\COMP4050\\test2\\lib\\MarchPenguin.jar\"");
+        // "\"C:\\Users\\joshu\\AppData\\Roaming\\Code\\User\\workspaceStorage\\f82a7962f137588b3d5804e53ca542d1\\redhat.java\\jdt_ws\\test1_d6ad7864\\bin;c:\\Users\\joshu\\OneDrive\\Documents\\Uni\\COMP4050\\test1\\lib\\jogl-all.jar;c:\\Users\\joshu\\OneDrive\\Documents\\Uni\\COMP4050\\test1\\lib\\core.jar;c:\\Users\\joshu\\OneDrive\\Documents\\Uni\\COMP4050\\test1\\lib\\gluegen-rt.jar;c:\\Users\\joshu\\OneDrive\\Documents\\Uni\\COMP4050\\test1\\lib\\MarchPenguin.jar\"");
+
+    }
+
+    // needs to handle converted PDE's -cp argument
     public static void compile(File Input) throws ExecutionException, InterruptedException, IOException {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+        JavaCompiler.CompilationTask task;
         System.out.println("Your systems javac: " + System.getProperty("java.version"));
         for (SourceVersion supportedVersion : compiler.getSourceVersions()) {
             System.out.println("This javac supports: " + supportedVersion);
         }
+
+        // compiler.run(in, out, err, arguments)
 
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
         StandardJavaFileManager sfm = compiler.getStandardFileManager(diagnostics, null, null);
@@ -185,8 +233,16 @@ public class App {
         for (JavaFileObject hold : jfo) {
             System.out.println(hold.getClass());
         }
-        JavaCompiler.CompilationTask task = compiler.getTask(null, sfm, diagnostics, null, null, jfo);
-        // task.call();
+
+        if (conversionCheck) {
+            Iterable<String> args = compilerArgs();
+            task = compiler.getTask(null, sfm, diagnostics, args, null, jfo);
+            System.out.println("Double check");
+
+        } else {
+            task = compiler.getTask(null, sfm, diagnostics, null, null, jfo);
+
+        }
 
         Future<Boolean> future = Executors.newFixedThreadPool(1).submit(task);
         Boolean result = future.get();
@@ -194,7 +250,7 @@ public class App {
             System.out.println("Compile Test Passed!");
             ctCheck = true;
         } else {
-            System.out.println("Gets in here");
+            System.out.println("Compile Test Failed!");
             diagnostics.getDiagnostics().forEach(System.out::println);
             ctCheck = false;
         }
@@ -202,11 +258,12 @@ public class App {
         sfm.close();
     }
 
-    public static void runProcessingCommand(String command) throws Exception {
+    public static int runProcessingCommand(String command) throws Exception {
         Process runCmd = Runtime.getRuntime().exec(command);
         System.out.println(command);
         runCmd.waitFor();
-        System.out.println(command + runCmd.exitValue());
+        System.out.println(command + " " + runCmd.exitValue());
+        return runCmd.exitValue();
     }
 
     public static void eolPrint(PrintWriter inputFile, char inputCharacter) {
