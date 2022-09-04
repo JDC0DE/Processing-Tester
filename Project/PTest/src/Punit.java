@@ -58,60 +58,13 @@ public class Punit {
         InputStreamReader in = new InputStreamReader(System.in);
         BufferedReader bf = new BufferedReader(in);
         try {
-            File inputFile = new File(args[0]);
-            System.out.println(args[0]);
-
-            if (inputFile.isDirectory() && inputFile.exists()) {
-                System.out.println("its a folder! - tonmoys recursive algo");
-            }
-
-            if (inputFile.isFile() && inputFile.exists()) {
-                if (Pattern.matches("\\w+\\.java", inputFile.getName())) {
-                    System.out.println("is java valid match: " + inputFile.getName());
-                    conversionCheck = false;
-                }
-
-                if (Pattern.matches("\\w+\\.pde", inputFile.getName())) {
-                    System.out.println("is pde valid match: " + inputFile.getName());
-                    String path = inputFile.getParent();
-                    runProcessingCommand(
-                            ".\\processing-java --sketch=" + path + " --run");
-                    if (runProcessingCommand(".\\processing-java --sketch=" + path + " "
-                            + "--output=C:\\Users\\joshu\\OneDrive\\Documents\\Uni\\COMP4050\\test2 --export") == 0) {
-                        conversionCheck = true;
-                        inputFile = new File(
-                                "C:\\Users\\joshu\\OneDrive\\Documents\\Uni\\COMP4050\\test2\\source\\MarchPenguin.java");
-                    } else {
-                        conversionCheck = false;
-                    }
-
-                    // runProcessingCommand(
-                    // ".\\processing-java
-                    // --sketch=C:\\Users\\joshu\\OneDrive\\Documents\\Uni\\COMP4050\\example_assignment-main\\example_assignment-main\\Submissions\\s0001_Alice_Penguin\\MarchPenguin
-                    // --output=C:\\Users\\joshu\\OneDrive\\Documents\\Uni\\COMP4050\\test1
-                    // --export");
-                }
-
-            }
-
             if (args[0].length() > 0) {
-                while (!str.equals(exit)) {
-                    str = bf.readLine();
-                    if (str.equals(compileTest)) {
-                        compile(inputFile);
-                    }
-                    if (str.equals(staticTest)) {
-                        System.out.println("Static Test Check");
-                    }
-                    if (str.equals(outPut)) {
-                        txtOutput(inputFile);
-                        resultOutput();
-                        // bf.close();
-                    }
-                }
-                System.out.println("System: exiting now!");
-                bf.close();
-                System.exit(0);
+                File inputFile = new File(args[0]);
+                System.out.println(args[0]);
+
+                directoryHandler(in, bf, inputFile);
+                javaProjectHandler(in, bf, inputFile);
+                processingProjectHandler(in, bf, inputFile);
 
             }
 
@@ -123,19 +76,81 @@ public class Punit {
 
     }
 
-    public static void processingProjectHandler() {
-
-    }
-
-    public static void javaProjectHandler() {
-
-    }
-
-    // for refactoring the code -todo
-    public static void commandHandler(String[] args, File input) {
+    public static void directoryHandler(InputStreamReader in, BufferedReader bf, File inputFile) {
         try {
+            if (inputFile.isDirectory() && inputFile.exists()) {
+                System.out.println("its a folder! - tonmoys recursive algo");
+            }
 
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void processingProjectHandler(InputStreamReader in, BufferedReader bf, File inputFile) {
+        try {
+            if (Pattern.matches("\\w+\\.pde", inputFile.getName())) {
+                System.out.println("is pde valid match: " + inputFile.getName());
+                String path = inputFile.getParent();
+                runProcessingCommand(
+                        ".\\processing-java --sketch=" + path + " --run");
+                if (runProcessingCommand(".\\processing-java --sketch=" + path + " "
+                        + "--output=C:\\Users\\joshu\\OneDrive\\Documents\\Uni\\COMP4050\\test2 --export") == 0) {
+                    conversionCheck = true;
+                    inputFile = new File(
+                            "C:\\Users\\joshu\\OneDrive\\Documents\\Uni\\COMP4050\\test2\\source\\MarchPenguin.java");
+                    commandHandler(in, bf, inputFile);
+                } else {
+                    conversionCheck = false;
+                }
+            }
+        } catch (Exception e) {
+
+        }
+
+    }
+
+    public static void javaProjectHandler(InputStreamReader in, BufferedReader bf, File inputFile) {
+        try {
+            if (inputFile.isFile() && inputFile.exists()) {
+                if (Pattern.matches("\\w+\\.java", inputFile.getName())) {
+                    System.out.println("is java valid match: " + inputFile.getName());
+                    conversionCheck = false;
+                    commandHandler(in, bf, inputFile);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    // handles the user input commands as specified in user manual
+    public static void commandHandler(InputStreamReader in, BufferedReader bf, File input) {
+        try {
+
+            while (!str.equals(exit)) {
+                str = bf.readLine();
+                if (str.equals(compileTest)) {
+                    compile(input);
+                }
+                if (str.equals(staticTest)) {
+                    System.out.println("Static Test Check");
+                }
+                if (str.equals(outPut)) {
+                    txtOutput(input);
+                    resultOutput();
+                    // bf.close();
+                }
+            }
+            System.out.println("System: exiting now!");
+            bf.close();
+            System.exit(0);
+
+        } catch (Exception e) {
+            System.out.println("Error: invalid input parameters");
+            e.printStackTrace();
 
         }
     }
